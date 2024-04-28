@@ -1,32 +1,56 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useContext } from 'react';
 import { Outlet, Navigate, useRoutes } from 'react-router-dom';
 
+import AuthContext from 'src/context/AuthContext';
 import DashboardLayout from 'src/layouts/dashboard';
 
 export const IndexPage = lazy(() => import('src/pages/app'));
-export const BlogPage = lazy(() => import('src/pages/blog'));
 export const UserPage = lazy(() => import('src/pages/user'));
 export const LoginPage = lazy(() => import('src/pages/login'));
-export const ProductsPage = lazy(() => import('src/pages/products'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
+export const ApprovalPage = lazy(() => import('src/pages/expenses'));
 
 // ----------------------------------------------------------------------
 
 export default function Router() {
+  const { isAuthenticated } = useContext(AuthContext);
+
   const routes = useRoutes([
     {
-      element: (
+      path: '/',
+      element: isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />,
+    },
+    {
+      path: 'dashboard', // Adjusted path for the dashboard
+      element: isAuthenticated ? (
+        <DashboardLayout>
+          <Suspense fallback={<div>Loading...</div>}>
+            <Outlet />
+          </Suspense>
+        </DashboardLayout>
+      ) : (
+        <Navigate to="/login" replace />
+      ),
+      children: [
+        { element: <IndexPage />, index: true },
+        { path: 'employees', element: <UserPage /> },
+      ],
+    },
+    {
+      path: '/',
+      element: isAuthenticated ? (
         <DashboardLayout>
           <Suspense>
             <Outlet />
           </Suspense>
         </DashboardLayout>
+         ) : (
+          <Navigate to="/login" replace />
       ),
       children: [
         { element: <IndexPage />, index: true },
-        { path: 'user', element: <UserPage /> },
-        { path: 'products', element: <ProductsPage /> },
-        { path: 'blog', element: <BlogPage /> },
+        { path: 'employees', element: <UserPage /> },
+        { path: 'approval', element: <ApprovalPage /> },
       ],
     },
     {

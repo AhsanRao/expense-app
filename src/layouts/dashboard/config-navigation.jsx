@@ -9,34 +9,30 @@ const icon = (name) => (
 const navConfig = [
   {
     title: 'dashboard',
-    path: '/',
+    path: '/dashboard',
+    alias: '/',
     icon: icon('ic_analytics'),
   },
   {
-    title: 'user',
-    path: '/user',
+    title: 'all employees',
+    path: '/employees',
     icon: icon('ic_user'),
   },
   {
-    title: 'product',
-    path: '/products',
-    icon: icon('ic_cart'),
-  },
-  {
-    title: 'blog',
-    path: '/blog',
+    title: 'expenses',
+    path: '/approval',
     icon: icon('ic_blog'),
   },
   {
-    title: 'login',
-    path: '/login',
-    icon: icon('ic_lock'),
+    title: 'logout',
+    action: 'logout',  // This is a custom action identifier
+    icon: icon('ic_lock'),  // Assume you have a logout icon
   },
-  {
-    title: 'Not found',
-    path: '/404',
-    icon: icon('ic_disabled'),
-  },
+  // {
+  //   title: 'login',
+  //   path: '/login',
+  //   icon: icon('ic_lock'),
+  // },
 ];
 
 export default navConfig;

@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Drawer from '@mui/material/Drawer';
-import Button from '@mui/material/Button';
+// import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import { alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
@@ -16,6 +17,7 @@ import { RouterLink } from 'src/routes/components';
 import { useResponsive } from 'src/hooks/use-responsive';
 
 import { account } from 'src/_mock/account';
+import AuthContext from 'src/context/AuthContext'; 
 
 import Logo from 'src/components/logo';
 import Scrollbar from 'src/components/scrollbar';
@@ -29,6 +31,8 @@ export default function Nav({ openNav, onCloseNav }) {
   const pathname = usePathname();
 
   const upLg = useResponsive('up', 'lg');
+  // const router = useRouter();
+
 
   useEffect(() => {
     if (openNav) {
@@ -69,35 +73,24 @@ export default function Nav({ openNav, onCloseNav }) {
       ))}
     </Stack>
   );
+  // const { logout } = useContext(AuthContext);
 
-  const renderUpgrade = (
-    <Box sx={{ px: 2.5, pb: 3, mt: 10 }}>
-      <Stack alignItems="center" spacing={3} sx={{ pt: 5, borderRadius: 2, position: 'relative' }}>
-        <Box
-          component="img"
-          src="/assets/illustrations/illustration_avatar.png"
-          sx={{ width: 100, position: 'absolute', top: -50 }}
-        />
-
-        <Box sx={{ textAlign: 'center' }}>
-          <Typography variant="h6">Get more?</Typography>
-
-          <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>
-            From only $69
-          </Typography>
-        </Box>
-
-        <Button
-          href="https://material-ui.com/store/items/minimal-dashboard/"
-          target="_blank"
-          variant="contained"
-          color="inherit"
-        >
-          Upgrade to Pro
-        </Button>
-      </Stack>
-    </Box>
-  );
+  // const handleLogout = () => {
+  //   logout();
+  //   console.log("logout");
+  //   // Optionally redirect the user to the login page or elsewhere
+  //   router.push('/login');
+  // };
+  // const renderLogout = (
+  //   <Button
+  //     onClick={handleLogout}
+  //     sx={{ my: 2, mx: 'auto', width: '90%' }} // Styling can be adjusted as needed
+  //     variant="contained"
+  //     color="primary"
+  //   >
+  //     Logout
+  //   </Button>
+  // );
 
   const renderContent = (
     <Scrollbar
@@ -118,7 +111,6 @@ export default function Nav({ openNav, onCloseNav }) {
 
       <Box sx={{ flexGrow: 1 }} />
 
-      {renderUpgrade}
     </Scrollbar>
   );
 
@@ -167,11 +159,24 @@ Nav.propTypes = {
 function NavItem({ item }) {
   const pathname = usePathname();
 
-  const active = item.path === pathname;
+  const { logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (item.path) {
+      navigate(item.path);
+    } else if (item.action === 'logout') {
+      logout();
+      navigate('/login');  // Redirect to login after logout
+    }
+  };
+
+  const active = item.path === pathname || pathname === item.alias;
 
   return (
     <ListItemButton
       component={RouterLink}
+      onClick={handleClick}
       href={item.path}
       sx={{
         minHeight: 44,
@@ -183,9 +188,9 @@ function NavItem({ item }) {
         ...(active && {
           color: 'primary.main',
           fontWeight: 'fontWeightSemiBold',
-          bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
+          bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16),
           '&:hover': {
-            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16),
+            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.18),
           },
         }),
       }}

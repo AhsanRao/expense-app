@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -11,20 +11,22 @@ import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 
 import { users } from 'src/_mock/user';
+import { fetchExpenses } from 'src/services/firebaseServices';
 
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 
 import TableNoData from '../table-no-data';
-import UserTableRow from '../user-table-row';
-import UserTableHead from '../user-table-head';
+import ExpenseTableRow from '../expense-table-row';
 import TableEmptyRows from '../table-empty-rows';
-import UserTableToolbar from '../user-table-toolbar';
+import UserTableHead from '../expense-table-head';
+import UserTableToolbar from '../expense-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
 
 // ----------------------------------------------------------------------
 
-export default function UserPage() {
+export default function ExpensePage() {
+  
   const [page, setPage] = useState(0);
 
   const [order, setOrder] = useState('asc');
@@ -93,14 +95,22 @@ export default function UserPage() {
   });
 
   const notFound = !dataFiltered.length && !!filterName;
-
+  const [expenses, setExpenses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+      fetchExpenses().then(data => {
+          setExpenses(data);
+          setLoading(false);
+      });
+  }, []);
   return (
     <Container>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-        <Typography variant="h4">All Employees</Typography>
+        <Typography variant="h4">Expenses</Typography>
 
         <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
-          Add Employee
+          Add Expense
         </Button>
       </Stack>
 
@@ -114,38 +124,40 @@ export default function UserPage() {
         <Scrollbar>
           <TableContainer sx={{ overflow: 'unset' }}>
             <Table sx={{ minWidth: 800 }}>
-              <UserTableHead
-                order={order}
-                orderBy={orderBy}
-                rowCount={users.length}
-                numSelected={selected.length}
-                onRequestSort={handleSort}
-                onSelectAllClick={handleSelectAllClick}
-                headLabel={[
-                  { id: 'name', label: 'Name' },
-                  { id: 'company', label: 'Company' },
-                  { id: 'role', label: 'Role' },
-                  { id: 'isVerified', label: 'Verified', align: 'center' },
-                  { id: 'status', label: 'Status' },
-                  { id: '' },
-                ]}
-              />
+            <UserTableHead
+  order={order}
+  orderBy={orderBy}
+  rowCount={expenses.length}
+  numSelected={selected.length}
+  onRequestSort={handleSort}
+  onSelectAllClick={handleSelectAllClick}
+  headLabel={[
+    { id: 'username', label: 'Username' },
+    { id: 'expenseType', label: 'Expense Type' },
+    { id: 'date', label: 'Date' },
+    { id: 'totalAmount', label: 'Amount' },
+    { id: 'isApproved', label: 'Approved', align: 'center' },
+    { id: 'actions', label: 'Actions', align: 'right' },
+  ]}
+/>
+
               <TableBody>
-                {dataFiltered
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row) => (
-                    <UserTableRow
-                      key={row.id}
-                      name={row.name}
-                      role={row.role}
-                      status={row.status}
-                      company={row.company}
-                      avatarUrl={row.avatarUrl}
-                      isVerified={row.isVerified}
-                      selected={selected.indexOf(row.name) !== -1}
-                      handleClick={(event) => handleClick(event, row.name)}
-                    />
-                  ))}
+              {expenses
+  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+  .map((expense) => (
+    <ExpenseTableRow
+      key={expense.id}
+      username={expense.username}
+      expenseType={expense.expenseType}
+      date={new Date(expense.date).toLocaleDateString()}
+      totalAmount={expense.totalAmount}
+      isApproved={expense.isApproved}
+      selected={selected.indexOf(expense.id) !== -1}
+      handleClick={(event) => handleClick(event, expense.id)}
+    />
+  ))
+}
+
 
                 <TableEmptyRows
                   height={77}

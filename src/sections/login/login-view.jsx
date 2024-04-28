@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -16,6 +16,8 @@ import InputAdornment from '@mui/material/InputAdornment';
 import { useRouter } from 'src/routes/hooks';
 
 import { bgGradient } from 'src/theme/css';
+import { account } from 'src/_mock/account';
+import AuthContext from 'src/context/AuthContext';
 
 import Logo from 'src/components/logo';
 import Iconify from 'src/components/iconify';
@@ -27,21 +29,53 @@ export default function LoginView() {
 
   const router = useRouter();
 
+  const { login } = useContext(AuthContext);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleClick = () => {
-    router.push('/dashboard');
+  const handleLogin = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    try {
+      // Here you would validate the credentials with an API call
+      // For demonstration, assume validation passes if email and password match mock data
+      if (email === account.email && password === account.password) {
+        login(); // Set isAuthenticated to true
+        router.push('/dashboard');
+      } else {
+        alert('Invalid credentials'); // Simple alert, replace with a nicer notification in a real app
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+      // Handle errors here, such as displaying a notification
+    } finally {
+      setLoading(false);
+    }
   };
+  // const handleClick = () => {
+  //   router.push('/dashboard');
+  // };
 
   const renderForm = (
-    <>
+    <form onSubmit={handleLogin}>
       <Stack spacing={3}>
-        <TextField name="email" label="Email address" />
+        <TextField
+          name="email"
+          label="Email address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
 
         <TextField
           name="password"
           label="Password"
           type={showPassword ? 'text' : 'password'}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -66,11 +100,11 @@ export default function LoginView() {
         type="submit"
         variant="contained"
         color="inherit"
-        onClick={handleClick}
+        loading={loading}
       >
         Login
       </LoadingButton>
-    </>
+    </form>
   );
 
   return (

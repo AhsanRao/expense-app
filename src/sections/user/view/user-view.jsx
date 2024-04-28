@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -10,7 +10,10 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 
+import { getComparator } from 'src/utils/sortingUtils';
+
 import { users } from 'src/_mock/user';
+import { fetchEmployeesAndExpenses } from 'src/services/firebaseServices';
 
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -19,12 +22,14 @@ import TableNoData from '../table-no-data';
 import UserTableRow from '../user-table-row';
 import UserTableHead from '../user-table-head';
 import TableEmptyRows from '../table-empty-rows';
+import { emptyRows, applyFilter } from '../utils';
 import UserTableToolbar from '../user-table-toolbar';
-import { emptyRows, applyFilter, getComparator } from '../utils';
 
 // ----------------------------------------------------------------------
 
 export default function UserPage() {
+  const [employees, setEmployees] = useState([]);
+
   const [page, setPage] = useState(0);
 
   const [order, setOrder] = useState('asc');
@@ -36,6 +41,27 @@ export default function UserPage() {
   const [filterName, setFilterName] = useState('');
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const [loading, setLoading] = useState(true);
+
+
+  useEffect(() => {
+    setLoading(true);
+    fetchEmployeesAndExpenses()
+      .then(data => {
+        if (Array.isArray(data)) {
+          setEmployees(data);
+        } else {
+          console.error('Fetched data is not an array:', data);
+        }
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error fetching employees:', error);
+        setLoading(false);
+      });
+  }, []);
+  
 
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
@@ -94,6 +120,17 @@ export default function UserPage() {
 
   const notFound = !dataFiltered.length && !!filterName;
 
+  const sortedEmployees = [...employees].sort(getComparator(order, orderBy));
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+  
+  if (!Array.isArray(sortedEmployees)) {
+    console.error('sortedEmployees is not an array:', sortedEmployees);
+    return <div>Error: Data is corrupted.</div>;
+  }
+
   return (
     <Container>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
@@ -122,34 +159,29 @@ export default function UserPage() {
                 onRequestSort={handleSort}
                 onSelectAllClick={handleSelectAllClick}
                 headLabel={[
-                  { id: 'name', label: 'Name' },
-                  { id: 'company', label: 'Company' },
-                  { id: 'role', label: 'Role' },
-                  { id: 'isVerified', label: 'Verified', align: 'center' },
-                  { id: 'status', label: 'Status' },
+                  { id: 'username', label: 'Username' },
+                  { id: 'email', label: 'Email' },
+                  { id: 'expensesCount', label: 'Expenses Count' },
                   { id: '' },
                 ]}
               />
               <TableBody>
-                {dataFiltered
+                {sortedEmployees
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row) => (
+                  .map((employee) => (
                     <UserTableRow
-                      key={row.id}
-                      name={row.name}
-                      role={row.role}
-                      status={row.status}
-                      company={row.company}
-                      avatarUrl={row.avatarUrl}
-                      isVerified={row.isVerified}
-                      selected={selected.indexOf(row.name) !== -1}
-                      handleClick={(event) => handleClick(event, row.name)}
+                    key={employee.id}
+                    username={employee.username}
+                    email={employee.email}
+                    expensesCount={employee.expensesCount}
+                      // selected={selected.indexOf(row.name) !== -1}
+                      handleClick={(event) => handleClick(event, employee.id)}
                     />
                   ))}
 
                 <TableEmptyRows
                   height={77}
-                  emptyRows={emptyRows(page, rowsPerPage, users.length)}
+                  emptyRows={emptyRows(page, rowsPerPage, employees.length)}
                 />
 
                 {notFound && <TableNoData query={filterName} />}
@@ -161,7 +193,7 @@ export default function UserPage() {
         <TablePagination
           page={page}
           component="div"
-          count={users.length}
+          count={employees.length}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}
           rowsPerPageOptions={[5, 10, 25]}

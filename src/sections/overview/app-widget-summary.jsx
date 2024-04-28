@@ -1,15 +1,14 @@
 import PropTypes from 'prop-types';
 
-import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import { Avatar } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { fShortenNumber } from 'src/utils/format-number';
 
 // ----------------------------------------------------------------------
 
-export default function AppWidgetSummary({ title, total, icon, color = 'primary', sx, ...other }) {
+export default function AppWidgetSummary({ title, total, icon, color = 'primary', backgroundColor, sx, ...other }) {
   return (
     <Card
       component={Stack}
@@ -23,23 +22,26 @@ export default function AppWidgetSummary({ title, total, icon, color = 'primary'
       }}
       {...other}
     >
-      {icon && <Box sx={{ width: 64, height: 64 }}>{icon}</Box>}
+      {icon && <Avatar sx={{ backgroundColor: {backgroundColor}, height: '84px', width: '84px' }}>{icon}</Avatar>}
 
       <Stack spacing={0.5}>
-        <Typography variant="h4">{fShortenNumber(total)}</Typography>
-
+      
         <Typography variant="subtitle2" sx={{ color: 'text.disabled' }}>
           {title}
         </Typography>
+        <Typography fontSize='1.78rem'>${total}</Typography>
       </Stack>
     </Card>
   );
 }
 
+
 AppWidgetSummary.propTypes = {
   color: PropTypes.string,
   icon: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
+  backgroundColor: PropTypes.string,
   sx: PropTypes.object,
   title: PropTypes.string,
   total: PropTypes.number,
+  
 };

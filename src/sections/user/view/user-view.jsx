@@ -1,33 +1,45 @@
+import { useSnackbar } from 'notistack';
 import React, { useState, useEffect } from 'react';
 
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
+import Dialog from '@mui/material/Dialog';
 import TableBody from '@mui/material/TableBody';
+import Container from '@mui/material/Container';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 
-import { getComparator } from 'src/utils/sortingUtils';
+import { applyFilter, getComparator } from 'src/utils/sortingUtils';
 
-import { users } from 'src/_mock/user';
-import { fetchEmployeesAndExpenses } from 'src/services/firebaseServices';
+import {
+  addEmployeeToDatabase,
+  updateEmployeeInDatabase,
+  fetchEmployeesAndExpenses,
+  deleteEmployeeFromDatabase,
+  deleteMultipleEmployeesFromDatabase,
+} from 'src/services/firebaseServices';
 
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 
+import { emptyRows } from '../utils';
 import TableNoData from '../table-no-data';
 import UserTableRow from '../user-table-row';
 import UserTableHead from '../user-table-head';
 import TableEmptyRows from '../table-empty-rows';
-import { emptyRows, applyFilter } from '../utils';
 import UserTableToolbar from '../user-table-toolbar';
 
 // ----------------------------------------------------------------------
 
 export default function UserPage() {
+  const { enqueueSnackbar } = useSnackbar();
+
   const [employees, setEmployees] = useState([]);
 
   const [page, setPage] = useState(0);
@@ -44,11 +56,90 @@ export default function UserPage() {
 
   const [loading, setLoading] = useState(true);
 
+  const [openModal, setOpenModal] = useState(false);
+  const [editingId, setEditingId] = useState(null); // ID of the employee being edited
+
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+  });
+
+  const handleAddEmployee = () => {
+    setEditingId(null);
+    setFormData({ username: '', email: '', password: '' }); // Reset form
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleModalSubmit = async () => {
+    if (formData.username && formData.email && formData.password) {
+      try {
+        if (editingId) {
+          await updateEmployeeInDatabase(editingId, {
+            username: formData.username,
+            email: formData.email,
+            password: formData.password,
+          });
+          setEmployees((prev) =>
+            prev.map((emp) => (emp.id === editingId ? { ...emp, ...formData } : emp))
+          );
+          enqueueSnackbar('Employee updated successfully', { variant: 'success' });
+        } else {
+          const newEmployee = await addEmployeeToDatabase(formData);
+          setEmployees((prev) => [...prev, { ...formData, id: newEmployee.id }]);
+          enqueueSnackbar('Employee added successfully', { variant: 'success' });
+        }
+        handleCloseModal();
+      } catch (error) {
+        enqueueSnackbar('Failed to submit employee data', { variant: 'error' });
+      }
+    } else {
+      enqueueSnackbar('Please fill all the fields', { variant: 'warning' });
+    }
+  };
+
+  const handleDelete = async (id) => {
+    console.log('delete', id);
+    try {
+      await deleteEmployeeFromDatabase(id);
+      setEmployees((prev) => prev.filter((emp) => emp.id !== id));
+      enqueueSnackbar('Employee deleted successfully', { variant: 'success' });
+    } catch (error) {
+      enqueueSnackbar('Failed to delete employee', { variant: 'error' });
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selected.length > 0) {
+      try {
+        await deleteMultipleEmployeesFromDatabase(selected);
+        setEmployees((prev) => prev.filter((emp) => !selected.includes(emp.id)));
+        setSelected([]);
+        enqueueSnackbar('Selected employees deleted successfully', { variant: 'success' });
+      } catch (error) {
+        enqueueSnackbar('Error deleting employees', { variant: 'error' });
+      }
+    } else {
+      enqueueSnackbar('No employees selected', { variant: 'warning' });
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
     fetchEmployeesAndExpenses()
-      .then(data => {
+      .then((data) => {
         if (Array.isArray(data)) {
           setEmployees(data);
         } else {
@@ -56,12 +147,11 @@ export default function UserPage() {
         }
         setLoading(false);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Error fetching employees:', error);
         setLoading(false);
       });
   }, []);
-  
 
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
@@ -73,18 +163,18 @@ export default function UserPage() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = users.map((n) => n.name);
+      const newSelecteds = employees.map((n) => n.id);
       setSelected(newSelecteds);
       return;
     }
     setSelected([]);
   };
 
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
+  const handleClick = (event, username) => {
+    const selectedIndex = selected.indexOf(username);
     let newSelected = [];
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
+      newSelected = newSelected.concat(selected, username);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -113,19 +203,34 @@ export default function UserPage() {
   };
 
   const dataFiltered = applyFilter({
-    inputData: users,
-    comparator: getComparator(order, orderBy),
+    inputData: employees,
+    comparator: [...employees].sort(getComparator(order, orderBy)),
     filterName,
   });
 
   const notFound = !dataFiltered.length && !!filterName;
 
-  const sortedEmployees = [...employees].sort(getComparator(order, orderBy));
+  const filteredEmployees = applyFilter({ inputData: employees, filterName });
+
+  const sortedEmployees = [...filteredEmployees].sort(getComparator(order, orderBy));
+
+  const handleEdit = (id) => {
+    const employee = sortedEmployees.find((emp) => emp.id === id);
+    if (employee) {
+      setFormData({
+        username: employee.username,
+        email: employee.email,
+        password: employee.password,
+      });
+      setEditingId(id);
+      setOpenModal(true);
+    }
+  };
 
   if (loading) {
     return <div>Loading...</div>;
   }
-  
+
   if (!Array.isArray(sortedEmployees)) {
     console.error('sortedEmployees is not an array:', sortedEmployees);
     return <div>Error: Data is corrupted.</div>;
@@ -136,7 +241,12 @@ export default function UserPage() {
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
         <Typography variant="h4">All Employees</Typography>
 
-        <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
+        <Button
+          variant="contained"
+          onClick={handleAddEmployee}
+          color="inherit"
+          startIcon={<Iconify icon="eva:plus-fill" />}
+        >
           Add Employee
         </Button>
       </Stack>
@@ -146,6 +256,7 @@ export default function UserPage() {
           numSelected={selected.length}
           filterName={filterName}
           onFilterName={handleFilterByName}
+          onDeleteSelected={handleDeleteSelected}
         />
 
         <Scrollbar>
@@ -154,8 +265,8 @@ export default function UserPage() {
               <UserTableHead
                 order={order}
                 orderBy={orderBy}
-                rowCount={users.length}
-                numSelected={selected.length}
+                rowCount={selected.length}
+                numSelected={sortedEmployees.length}
                 onRequestSort={handleSort}
                 onSelectAllClick={handleSelectAllClick}
                 headLabel={[
@@ -170,12 +281,14 @@ export default function UserPage() {
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((employee) => (
                     <UserTableRow
-                    key={employee.id}
-                    username={employee.username}
-                    email={employee.email}
-                    expensesCount={employee.expensesCount}
-                      // selected={selected.indexOf(row.name) !== -1}
+                      id={employee.id}
+                      username={employee.username}
+                      email={employee.email}
+                      expensesCount={employee.expensesCount}
+                      selected={selected.indexOf(employee.id) !== -1}
                       handleClick={(event) => handleClick(event, employee.id)}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
                     />
                   ))}
 
@@ -200,6 +313,41 @@ export default function UserPage() {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Card>
+      <Dialog open={openModal} onClose={handleCloseModal}>
+        <DialogTitle>{editingId ? 'Edit Employee' : 'Add Employee'}</DialogTitle>
+        <DialogContent>
+          <TextField
+            name="username"
+            label="Username"
+            fullWidth
+            value={formData.username}
+            onChange={handleInputChange}
+            margin="normal"
+            variant="outlined"
+          />
+          <TextField
+            name="email"
+            label="Email"
+            fullWidth
+            value={formData.email}
+            onChange={handleInputChange}
+            margin="normal"
+            variant="outlined"
+          />
+          <TextField
+            name="password"
+            label="Password"
+            fullWidth
+            value={formData.password}
+            onChange={handleInputChange}
+            margin="normal"
+            variant="outlined"
+          />
+          <Button onClick={handleModalSubmit} variant="contained" color="primary">
+            {editingId ? 'Update' : 'Add'} Employee
+          </Button>
+        </DialogContent>
+      </Dialog>
     </Container>
   );
 }

@@ -15,7 +15,7 @@ import {
   TablePagination,
 } from '@mui/material';
 
-import { sortExpenses, getComparator } from 'src/utils/sortingUtils';
+import { sortExpenses,getComparator, applyExpenseFilter  } from 'src/utils/sortingUtils';
 
 import { fetchExpenses, updateExpense } from 'src/services/firebaseServices';
 
@@ -106,7 +106,9 @@ export default function ExpensePage() {
     return <div>Loading...</div>;
   }
 
-  const sortedExpenses = sortExpenses(expenses, getComparator(order, orderBy));
+  const filteredEmployees = applyExpenseFilter({ inputData: expenses, filterName });
+
+  const sortedExpenses = sortExpenses(filteredEmployees, getComparator(order, orderBy));
 
   const fetchAndUpdateExpenses = async () => {
     try {

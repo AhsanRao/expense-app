@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 
-// import Stack from '@mui/material/Stack';
-// import Avatar from '@mui/material/Avatar';
 import Popover from '@mui/material/Popover';
 import TableRow from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
@@ -11,17 +9,19 @@ import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 
-// import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
 export default function UserTableRow({
   selected,
+  id,
   username,
   email,
   expensesCount,
-  handleClick
+  handleClick,
+  onEdit,
+  onDelete,
 }) {
   const [open, setOpen] = useState(null);
 
@@ -37,27 +37,24 @@ export default function UserTableRow({
     <>
       <TableRow hover tabIndex={-1} role="checkbox" selected={selected}>
         <TableCell padding="checkbox">
-        <Checkbox disableRipple checked={selected} onChange={(event) => handleClick(event, username)} />
+          <Checkbox disableRipple checked={selected} onChange={(event) => handleClick(event, id)} />
         </TableCell>
 
-
         <TableCell component="th" scope="row" padding="none">
-        <Typography variant="subtitle2" noWrap>
-          {username}
-        </Typography>
-      </TableCell>
+          <Typography variant="subtitle2" noWrap>
+            {username}
+          </Typography>
+        </TableCell>
 
-      <TableCell>
-        <Typography variant="body2" noWrap>
-          {email}
-        </Typography>
-      </TableCell>
+        <TableCell>
+          <Typography variant="body2" noWrap>
+            {email}
+          </Typography>
+        </TableCell>
 
-      <TableCell >
-        <Typography variant="body2">
-          {expensesCount}
-        </Typography>
-      </TableCell>
+        <TableCell>
+          <Typography variant="body2">{expensesCount}</Typography>
+        </TableCell>
 
         <TableCell align="right">
           <IconButton onClick={handleOpenMenu}>
@@ -76,12 +73,23 @@ export default function UserTableRow({
           sx: { width: 140 },
         }}
       >
-        <MenuItem onClick={handleCloseMenu}>
+        <MenuItem
+          onClick={() => {
+            onEdit(id);
+            handleCloseMenu();
+          }}
+        >
           <Iconify icon="eva:edit-fill" sx={{ mr: 2 }} />
           Edit
         </MenuItem>
 
-        <MenuItem onClick={handleCloseMenu} sx={{ color: 'error.main' }}>
+        <MenuItem
+          onClick={() => {
+            onDelete(id);
+            handleCloseMenu();
+          }}
+          sx={{ color: 'error.main' }}
+        >
           <Iconify icon="eva:trash-2-outline" sx={{ mr: 2 }} />
           Delete
         </MenuItem>
@@ -92,8 +100,11 @@ export default function UserTableRow({
 
 UserTableRow.propTypes = {
   username: PropTypes.string.isRequired,
+  id: PropTypes.string.isRequired,
   email: PropTypes.string.isRequired,
   expensesCount: PropTypes.number.isRequired,
-  selected: PropTypes.bool.isRequired,
-  handleClick: PropTypes.func.isRequired
+  selected: PropTypes.bool,
+  handleClick: PropTypes.func,
+  onEdit: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
 };

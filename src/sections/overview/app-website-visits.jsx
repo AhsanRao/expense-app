@@ -59,7 +59,16 @@ export default function AppWebsiteVisits({ title, subheader, chart, ...other }) 
 }
 
 AppWebsiteVisits.propTypes = {
-  chart: PropTypes.object,
+  chart: PropTypes.shape({
+    labels: PropTypes.arrayOf(PropTypes.string),
+    colors: PropTypes.arrayOf(PropTypes.string),
+    series: PropTypes.arrayOf(PropTypes.shape({
+      name: PropTypes.string,
+      data: PropTypes.arrayOf(PropTypes.number),
+      fill: PropTypes.string
+    })),
+    options: PropTypes.object
+  }),
   subheader: PropTypes.string,
   title: PropTypes.string,
 };

@@ -1,10 +1,9 @@
+import { useSnackbar } from 'notistack';
 import { useState, useContext } from 'react';
 
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -34,30 +33,27 @@ export default function LoginView() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
 
   const handleLogin = async (event) => {
     event.preventDefault();
     setLoading(true);
+
     try {
-      // Here you would validate the credentials with an API call
-      // For demonstration, assume validation passes if email and password match mock data
       if (email === account.email && password === account.password) {
-        login(); // Set isAuthenticated to true
-        router.push('/dashboard');
+        login();
+        router.push('/dashboard'); // Redirecting to dashboard
+        enqueueSnackbar('Login successful', { variant: 'success' });
       } else {
-        alert('Invalid credentials'); // Simple alert, replace with a nicer notification in a real app
+        enqueueSnackbar('Invalid credentials', { variant: 'error' });
       }
     } catch (error) {
       console.error('Login failed:', error);
-      // Handle errors here, such as displaying a notification
+      enqueueSnackbar('Login failed', { variant: 'error' });
     } finally {
       setLoading(false);
     }
-  };
-  // const handleClick = () => {
-  //   router.push('/dashboard');
-  // };
-
+};
   const renderForm = (
     <form onSubmit={handleLogin}>
       <Stack spacing={3}>
@@ -88,11 +84,11 @@ export default function LoginView() {
         />
       </Stack>
 
-      <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ my: 3 }}>
+      {/* <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ my: 3 }}>
         <Link variant="subtitle2" underline="hover">
           Forgot password?
         </Link>
-      </Stack>
+      </Stack> */}
 
       <LoadingButton
         fullWidth
@@ -101,6 +97,7 @@ export default function LoginView() {
         variant="contained"
         color="inherit"
         loading={loading}
+        sx={{ my: 3 }}
       >
         Login
       </LoadingButton>
@@ -133,51 +130,10 @@ export default function LoginView() {
             maxWidth: 420,
           }}
         >
-          <Typography variant="h4">Sign in to Minimal</Typography>
+          <Typography variant="h4">Sign in to Expense App</Typography>
 
-          <Typography variant="body2" sx={{ mt: 2, mb: 5 }}>
-            Don’t have an account?
-            <Link variant="subtitle2" sx={{ ml: 0.5 }}>
-              Get started
-            </Link>
-          </Typography>
-
-          <Stack direction="row" spacing={2}>
-            <Button
-              fullWidth
-              size="large"
-              color="inherit"
-              variant="outlined"
-              sx={{ borderColor: alpha(theme.palette.grey[500], 0.16) }}
-            >
-              <Iconify icon="eva:google-fill" color="#DF3E30" />
-            </Button>
-
-            <Button
-              fullWidth
-              size="large"
-              color="inherit"
-              variant="outlined"
-              sx={{ borderColor: alpha(theme.palette.grey[500], 0.16) }}
-            >
-              <Iconify icon="eva:facebook-fill" color="#1877F2" />
-            </Button>
-
-            <Button
-              fullWidth
-              size="large"
-              color="inherit"
-              variant="outlined"
-              sx={{ borderColor: alpha(theme.palette.grey[500], 0.16) }}
-            >
-              <Iconify icon="eva:twitter-fill" color="#1C9CEA" />
-            </Button>
-          </Stack>
-
-          <Divider sx={{ my: 3 }}>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              OR
-            </Typography>
+                    <Divider sx={{ my: 3 }}>
+            {}
           </Divider>
 
           {renderForm}

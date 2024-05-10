@@ -10,11 +10,6 @@ export const AuthProvider = ({ children }) => {
     return storedAuth === 'true';
   });
 
-  // useEffect(() => {
-  //   const storedAuth = localStorage.getItem('isAuthenticated');
-  //   setIsAuthenticated(storedAuth === 'true');
-  // }, []);
-
   const login = () => {
     setIsAuthenticated(true);
     localStorage.setItem('isAuthenticated', 'true');
@@ -25,21 +20,20 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('isAuthenticated');
   };
 
-  const value = useMemo(() => ({
-    isAuthenticated,
-    login,
-    logout
-  }), [isAuthenticated]);
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({
+      isAuthenticated,
+      login,
+      logout,
+    }),
+    [isAuthenticated]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 AuthProvider.propTypes = {
-  children: PropTypes.node.isRequired
+  children: PropTypes.node.isRequired,
 };
 
 export default AuthContext;

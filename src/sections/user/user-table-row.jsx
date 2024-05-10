@@ -17,8 +17,8 @@ export default function UserTableRow({
   selected,
   id,
   username,
-  email,
-  expensesCount,
+  name,
+  password,
   handleClick,
   onEdit,
   onDelete,
@@ -40,7 +40,7 @@ export default function UserTableRow({
           <Checkbox disableRipple checked={selected} onChange={(event) => handleClick(event, id)} />
         </TableCell>
 
-        <TableCell component="th" scope="row" padding="none">
+        <TableCell component="th" scope="row" style={{ paddingLeft: '15px' }}>
           <Typography variant="subtitle2" noWrap>
             {username}
           </Typography>
@@ -48,12 +48,12 @@ export default function UserTableRow({
 
         <TableCell>
           <Typography variant="body2" noWrap>
-            {email}
+            {name}
           </Typography>
         </TableCell>
 
         <TableCell>
-          <Typography variant="body2">{expensesCount}</Typography>
+          <Typography variant="body2">{password}</Typography>
         </TableCell>
 
         <TableCell align="right">
@@ -101,8 +101,8 @@ export default function UserTableRow({
 UserTableRow.propTypes = {
   username: PropTypes.string.isRequired,
   id: PropTypes.string.isRequired,
-  email: PropTypes.string.isRequired,
-  expensesCount: PropTypes.number.isRequired,
+  name: PropTypes.string.isRequired,
+  password: PropTypes.string.isRequired,
   selected: PropTypes.bool,
   handleClick: PropTypes.func,
   onEdit: PropTypes.func.isRequired,

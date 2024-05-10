@@ -1,3 +1,5 @@
+import { formatMonth } from 'src/utils/format-month';
+
 export const descendingComparator = (a, b, orderBy) => {
     if (b[orderBy] < a[orderBy]) {
       return -1;
@@ -23,10 +25,12 @@ export const descendingComparator = (a, b, orderBy) => {
 
     return inputData.filter(item => {
       const itemUsername = item.username;
-      const itemEmail = item.email;
+      const itemName = item.name;
+      const itemPassowrd = item.password;
       return (
         (itemUsername && typeof itemUsername === 'string' && itemUsername.toLowerCase().includes(lowerCaseFilter)) ||
-        (itemEmail && typeof itemEmail === 'string' && itemEmail.toLowerCase().includes(lowerCaseFilter))
+        (itemName && typeof itemName === 'string' && itemName.toLowerCase().includes(lowerCaseFilter)) ||
+        (itemPassowrd && typeof itemPassowrd === 'string' && itemPassowrd.toLowerCase().includes(lowerCaseFilter))
       );
     });
   };
@@ -39,9 +43,9 @@ export const applyExpenseFilter = ({ inputData, filterName }) => {
 
   return inputData.filter(expense =>
     (expense.username && expense.username.toLowerCase().includes(lowerCaseFilter)) ||
-    (expense.expenseType && expense.expenseType.toLowerCase().includes(lowerCaseFilter)) ||
-    (expense.totalAmount && expense.totalAmount.toString().includes(lowerCaseFilter)) ||
-    (expense.isApproved !== undefined && expense.isApproved.toString().toLowerCase().includes(lowerCaseFilter))
+    (expense.month && expense.month.toLowerCase().includes(lowerCaseFilter)) ||
+    (formatMonth(expense.month) && formatMonth(expense.month).toLowerCase().includes(lowerCaseFilter)) ||
+    (expense.approved !== undefined && expense.approved.toString().toLowerCase().includes(lowerCaseFilter))
   );
 };
 

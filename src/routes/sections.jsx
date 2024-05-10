@@ -9,6 +9,8 @@ export const UserPage = lazy(() => import('src/pages/user'));
 export const LoginPage = lazy(() => import('src/pages/login'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 export const ApprovalPage = lazy(() => import('src/pages/expenses'));
+export const ProfilePage = lazy(() => import ('src/pages/profile-page'));
+export const DetailedExpenses = lazy(() => import('src/pages/detailed-expenses'));
 
 // ----------------------------------------------------------------------
 
@@ -51,6 +53,9 @@ export default function Router() {
         { element: <IndexPage />, index: true },
         { path: 'employees', element: <UserPage /> },
         { path: 'approval', element: <ApprovalPage /> },
+        { path: 'expenses/:userId/:month', element: <DetailedExpenses /> }, // route for detailed expenses
+        { path: 'profile', element: <ProfilePage /> },
+
       ],
     },
     {

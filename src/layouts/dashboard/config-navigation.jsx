@@ -18,21 +18,16 @@ const navConfig = [
     path: '/employees',
     icon: icon('ic_user'),
   },
-  {
-    title: 'expenses',
-    path: '/approval',
-    icon: icon('ic_blog'),
-  },
+  // {
+  //   title: 'expenses',
+  //   path: '/approval',
+  //   icon: icon('ic_blog'),
+  // },
   {
     title: 'logout',
     action: 'logout',  // This is a custom action identifier
-    icon: icon('ic_lock'),  // Assume you have a logout icon
+    icon: icon('ic_lock'),
   },
-  // {
-  //   title: 'login',
-  //   path: '/login',
-  //   icon: icon('ic_lock'),
-  // },
 ];
 
 export default navConfig;

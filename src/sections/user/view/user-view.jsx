@@ -18,9 +18,9 @@ import TablePagination from '@mui/material/TablePagination';
 import { applyFilter, getComparator } from 'src/utils/sortingUtils';
 
 import {
+  fetchEmployees,
   addEmployeeToDatabase,
   updateEmployeeInDatabase,
-  fetchEmployeesAndExpenses,
   deleteEmployeeFromDatabase,
   deleteMultipleEmployeesFromDatabase,
 } from 'src/services/firebaseServices';
@@ -61,13 +61,13 @@ export default function UserPage() {
 
   const [formData, setFormData] = useState({
     username: '',
-    email: '',
+    name: '',
     password: '',
   });
 
   const handleAddEmployee = () => {
     setEditingId(null);
-    setFormData({ username: '', email: '', password: '' }); // Reset form
+    setFormData({ username: '', name: '', password: '' }); // Reset form
     setOpenModal(true);
   };
 
@@ -84,12 +84,12 @@ export default function UserPage() {
   };
 
   const handleModalSubmit = async () => {
-    if (formData.username && formData.email && formData.password) {
+    if (formData.username && formData.name && formData.password) {
       try {
         if (editingId) {
           await updateEmployeeInDatabase(editingId, {
             username: formData.username,
-            email: formData.email,
+            name: formData.name,
             password: formData.password,
           });
           setEmployees((prev) =>
@@ -138,7 +138,7 @@ export default function UserPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetchEmployeesAndExpenses()
+    fetchEmployees()
       .then((data) => {
         if (Array.isArray(data)) {
           setEmployees(data);
@@ -219,7 +219,7 @@ export default function UserPage() {
     if (employee) {
       setFormData({
         username: employee.username,
-        email: employee.email,
+        name: employee.name,
         password: employee.password,
       });
       setEditingId(id);
@@ -271,8 +271,8 @@ export default function UserPage() {
                 onSelectAllClick={handleSelectAllClick}
                 headLabel={[
                   { id: 'username', label: 'Username' },
-                  { id: 'email', label: 'Email' },
-                  { id: 'expensesCount', label: 'Expenses Count' },
+                  { id: 'name', label: 'Name' },
+                  { id: 'password', label: 'Password' },
                   { id: '' },
                 ]}
               />
@@ -283,8 +283,8 @@ export default function UserPage() {
                     <UserTableRow
                       id={employee.id}
                       username={employee.username}
-                      email={employee.email}
-                      expensesCount={employee.expensesCount}
+                      name={employee.name}
+                      password={employee.password}
                       selected={selected.indexOf(employee.id) !== -1}
                       handleClick={(event) => handleClick(event, employee.id)}
                       onEdit={handleEdit}
@@ -326,10 +326,10 @@ export default function UserPage() {
             variant="outlined"
           />
           <TextField
-            name="email"
-            label="Email"
+            name="name"
+            label="Name"
             fullWidth
-            value={formData.email}
+            value={formData.name}
             onChange={handleInputChange}
             margin="normal"
             variant="outlined"

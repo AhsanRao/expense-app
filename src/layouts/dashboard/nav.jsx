@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Drawer from '@mui/material/Drawer';
-// import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import { alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
@@ -16,8 +15,8 @@ import { RouterLink } from 'src/routes/components';
 
 import { useResponsive } from 'src/hooks/use-responsive';
 
-import { account } from 'src/_mock/account';
-import AuthContext from 'src/context/AuthContext'; 
+import account from 'src/_mock/account';
+import AuthContext from 'src/context/AuthContext';
 
 import Logo from 'src/components/logo';
 import Scrollbar from 'src/components/scrollbar';
@@ -31,8 +30,6 @@ export default function Nav({ openNav, onCloseNav }) {
   const pathname = usePathname();
 
   const upLg = useResponsive('up', 'lg');
-  // const router = useRouter();
-
 
   useEffect(() => {
     if (openNav) {
@@ -73,24 +70,6 @@ export default function Nav({ openNav, onCloseNav }) {
       ))}
     </Stack>
   );
-  // const { logout } = useContext(AuthContext);
-
-  // const handleLogout = () => {
-  //   logout();
-  //   console.log("logout");
-  //   // Optionally redirect the user to the login page or elsewhere
-  //   router.push('/login');
-  // };
-  // const renderLogout = (
-  //   <Button
-  //     onClick={handleLogout}
-  //     sx={{ my: 2, mx: 'auto', width: '90%' }} // Styling can be adjusted as needed
-  //     variant="contained"
-  //     color="primary"
-  //   >
-  //     Logout
-  //   </Button>
-  // );
 
   const renderContent = (
     <Scrollbar
@@ -110,7 +89,6 @@ export default function Nav({ openNav, onCloseNav }) {
       {renderMenu}
 
       <Box sx={{ flexGrow: 1 }} />
-
     </Scrollbar>
   );
 
@@ -167,7 +145,7 @@ function NavItem({ item }) {
       navigate(item.path);
     } else if (item.action === 'logout') {
       logout();
-      navigate('/login');  // Redirect to login after logout
+      navigate('/login'); // Redirect to login after logout
     }
   };
 

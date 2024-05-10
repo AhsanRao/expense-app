@@ -1,44 +1,26 @@
-import { useState } from 'react';
 import PropTypes from 'prop-types';
 
-// import Stack from '@mui/material/Stack';
-// import Avatar from '@mui/material/Avatar';
-// import Popover from '@mui/material/Popover';
-import Button from '@mui/material/Button';
+import { Button } from '@mui/material';
 import TableRow from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
-// import MenuItem from '@mui/material/MenuItem';
 import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import { red, green } from '@mui/material/colors';
+import { red, blue, green } from '@mui/material/colors';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
-// import Label from 'src/components/label';
-// import Iconify from 'src/components/iconify';
+import { formatMonth } from 'src/utils/format-month';
 
 // ----------------------------------------------------------------------
 
 export default function ExpenseTableRow({
   selected,
-  expenseType,
-  date,
-  totalAmount,
+  month,
   isApproved,
   username,
+  handleViewDetails,
   handleClick,
-  handleApprove,
-  handleReject,
 }) {
-  const [setOpen] = useState(null);
-
-  const handleOpenMenu = (event) => {
-    setOpen(event.currentTarget);
-  };
-
-  // const handleCloseMenu = () => {
-  //   setOpen(null);
-  // };
-
   return (
     <>
       <TableRow hover tabIndex={-1} role="checkbox" selected={selected}>
@@ -46,106 +28,49 @@ export default function ExpenseTableRow({
           <Checkbox disableRipple checked={selected} onChange={handleClick} />
         </TableCell>
 
-        <TableCell component="th" scope="row" padding="none">
+        <TableCell component="th" scope="row" align="left">
           <Typography variant="subtitle2" noWrap>
             {username}
           </Typography>
         </TableCell>
 
-        <TableCell>{expenseType}</TableCell>
-
-        <TableCell>{new Date(date).toLocaleDateString()}</TableCell>
-
-        <TableCell>${totalAmount}</TableCell>
+        <TableCell>{formatMonth(month)}</TableCell>
 
         <TableCell>
-          <Button
-            variant="contained"
-            color="success"
-            onClick={() => handleApprove(username)}
-            disabled={isApproved}
-            size="small"
-            sx={{
-              backgroundColor: `${green[500]}CC`, // 80% opacity
-              color: '#fff',
-              '&:hover': {
-                backgroundColor: `${green[700]}CC`, // Darker on hover with the same transparency
-              },
-              '&.Mui-disabled': {
-                backgroundColor: `${green[200]}80`, // Lighter green when button is disabled
-              },
-            }}
-          >
-            Approve
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() => handleReject(username)}
-            disabled={!isApproved}
-            size="small"
-            style={{ marginLeft: 8 }}
-            sx={{
-              marginLeft: 1,
-              backgroundColor: `${red[500]}CC`, // 80% opacity
-              color: '#fff',
-              '&:hover': {
-                backgroundColor: `${red[700]}CC`, // Darker red on hover with transparency
-              },
-              '&.Mui-disabled': {
-                backgroundColor: `${red[200]}80`, // Lighter red when button is disabled
-              },
-            }}
-          >
-            Reject
-          </Button>
+          {isApproved ? (
+            <CheckCircleOutlineIcon style={{ color: green[500] }} />
+          ) : (
+            <HighlightOffIcon style={{ color: red[500] }} />
+          )}
         </TableCell>
-
-        {/* <TableCell>
-          <Label color={isApproved ? 'success' : 'error'}>
-            {isApproved ? 'Approved' : 'Not Approved'}
-          </Label>
-        </TableCell> */}
-
-        <TableCell align="right">
-          <IconButton onClick={handleOpenMenu}>
-            {/* <Iconify icon="eva:more-vertical-fill" /> */}
-          </IconButton>
+        <TableCell>
+          <Button
+            onClick={() => handleViewDetails(username, month)}
+            variant="contained"
+            size="small"
+            sx={{
+              backgroundColor: `${blue[500]}B3`, // Approximately 70% opacity
+              color: '#fff',
+              '&:hover': {
+                backgroundColor: `${blue[700]}CC`, // Darker on hover with the 80% opacity
+              },
+            }}
+          >
+            View
+          </Button>
         </TableCell>
       </TableRow>
 
-      {/* <Popover
-        open={!!open}
-        anchorEl={open}
-        onClose={handleCloseMenu}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        PaperProps={{
-          sx: { width: 140 },
-        }}
-      >
-        <MenuItem onClick={handleCloseMenu}>
-          <Iconify icon="eva:edit-fill" sx={{ mr: 2 }} />
-          Edit
-        </MenuItem>
-
-        <MenuItem onClick={handleCloseMenu} sx={{ color: 'error.main' }}>
-          <Iconify icon="eva:trash-2-outline" sx={{ mr: 2 }} />
-          Delete
-        </MenuItem>
-      </Popover> */}
+      {}
     </>
   );
 }
 
 ExpenseTableRow.propTypes = {
   username: PropTypes.string,
-  expenseType: PropTypes.string,
-  date: PropTypes.string,
-  totalAmount: PropTypes.number,
+  month: PropTypes.string,
   isApproved: PropTypes.bool,
   selected: PropTypes.bool,
+  handleViewDetails: PropTypes.func,
   handleClick: PropTypes.func,
-  handleApprove: PropTypes.func.isRequired,
-  handleReject: PropTypes.func.isRequired,
 };
